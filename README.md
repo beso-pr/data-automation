@@ -4,6 +4,7 @@
 ![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)
 ![license](https://img.shields.io/badge/license-MIT-green)
+![Report Preview](screenshots/report_preview.png)
 
 A small, production-shaped Python automation that turns a raw multi-currency
 sales CSV into a normalised SQLite warehouse and a self-contained HTML report —
