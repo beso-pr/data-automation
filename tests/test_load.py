@@ -29,10 +29,7 @@ def test_load_to_sqlite_writes_all_expected_tables(
 
     assert db.exists()
     with sqlite3.connect(db) as conn:
-        names = {
-            row[0]
-            for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        }
+        names = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
 
     expected = {"ref_fx_rates", "ref_weather", *TABLE_MAP.values()}
     assert expected.issubset(names)
@@ -45,10 +42,7 @@ def test_load_to_sqlite_creates_indexes(
     db = tmp_path / "etl.sqlite"
     load_to_sqlite(result, sample_fx_rates, sample_weather, db)
     with sqlite3.connect(db) as conn:
-        idx = {
-            row[0]
-            for row in conn.execute("SELECT name FROM sqlite_master WHERE type='index'")
-        }
+        idx = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='index'")}
     assert "ix_fact_sales_date" in idx
     assert "ix_fx_rates_date_ccy" in idx
 

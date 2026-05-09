@@ -14,53 +14,114 @@ GOOD_CSV = """date,city,country,currency,amount_local,units_sold,channel
 """
 
 
+def _write(tmp_path: Path, content: str) -> Path:
+    path = tmp_path / "sales.csv"
+    path.write_text(content, encoding="utf-8")
+    return path
+
+
 def test_load_sales_parses_clean_input(tmp_path: Path) -> None:
-    path = tmp_path / "sales.csv"
-    path.write_text(GOOD_CSV, encoding="utf-8")
-    df = load_sales(path)
+    df = load_sales(_write(tmp_path, GOOD_CSV))
     assert len(df) == 2
-    assert set(df.columns) >= {"date", "city", "country", "currency", "amount_local", "units_sold"}
     assert df["currency"].tolist() == ["EUR", "GBP"]
+    assert df["units_sold"].dtype.kind == "i"
 
 
-def test_load_sales_rejects_missing_columns(tmp_path: Path) -> None:
-    path = tmp_path / "sales.csv"
-    path.write_text("date,city\n2024-09-02,Berlin\n", encoding="utf-8")
-    with pytest.raises(SalesValidationError, match="missing required columns"):
-        load_sales(path)
+def test_missing_columns_reported_at_schema_level(tmp_path: Path) -> None:
+    bad = _write(tmp_path, "date,city\n2024-09-02,Berlin\n")
+    with pytest.raises(SalesValidationError) as exc:
+        load_sales(bad)
+    assert "missing required columns" in str(exc.value)
+    assert "amount_local" in str(exc.value)
 
 
-def test_load_sales_rejects_invalid_dates(tmp_path: Path) -> None:
-    path = tmp_path / "sales.csv"
-    path.write_text(
+def test_invalid_date_reports_row_index(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
         "date,city,country,currency,amount_local,units_sold\nnot-a-date,Berlin,DE,EUR,100,10\n",
-        encoding="utf-8",
     )
-    with pytest.raises(SalesValidationError, match="invalid dates"):
-        load_sales(path)
+    with pytest.raises(SalesValidationError) as exc:
+        load_sales(bad)
+    msg = str(exc.value)
+    assert "row 0" in msg and "date" in msg
 
 
-def test_load_sales_rejects_negative_amounts(tmp_path: Path) -> None:
-    path = tmp_path / "sales.csv"
-    path.write_text(
+def test_negative_amount_rejected(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
         "date,city,country,currency,amount_local,units_sold\n2024-09-02,Berlin,DE,EUR,-1,10\n",
-        encoding="utf-8",
     )
-    with pytest.raises(SalesValidationError, match="invalid amount_local"):
-        load_sales(path)
+    with pytest.raises(SalesValidationError, match="non-negative"):
+        load_sales(bad)
 
 
-def test_load_sales_raises_on_missing_file(tmp_path: Path) -> None:
-    with pytest.raises(FileNotFoundError):
-        load_sales(tmp_path / "nope.csv")
+def test_non_integer_units_rejected(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
+        "date,city,country,currency,amount_local,units_sold\n2024-09-02,Berlin,DE,EUR,100,1.5\n",
+    )
+    with pytest.raises(SalesValidationError, match="whole number"):
+        load_sales(bad)
+
+
+def test_bad_currency_code_rejected(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
+        "date,city,country,currency,amount_local,units_sold\n2024-09-02,Berlin,DE,EU,100,10\n",
+    )
+    with pytest.raises(SalesValidationError, match="3-letter ISO"):
+        load_sales(bad)
+
+
+def test_bad_country_code_rejected(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
+        "date,city,country,currency,amount_local,units_sold\n2024-09-02,Berlin,DEU,EUR,100,10\n",
+    )
+    with pytest.raises(SalesValidationError, match="2-letter ISO"):
+        load_sales(bad)
+
+
+def test_duplicate_rows_flagged(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
+        "date,city,country,currency,amount_local,units_sold,channel\n"
+        "2024-09-02,Berlin,DE,EUR,100,10,online\n"
+        "2024-09-02,Berlin,DE,EUR,150,12,online\n",
+    )
+    with pytest.raises(SalesValidationError, match="duplicate row"):
+        load_sales(bad)
+
+
+def test_all_issues_collected_in_one_pass(tmp_path: Path) -> None:
+    bad = _write(
+        tmp_path,
+        "date,city,country,currency,amount_local,units_sold\n"
+        "not-a-date,Berlin,DE,EUR,-1,1.5\n"
+        "2024-09-02,,DE,EU,100,10\n",
+    )
+    with pytest.raises(SalesValidationError) as exc:
+        load_sales(bad)
+    msg = str(exc.value)
+    # Multiple issues from different rows / columns must all appear.
+    assert "row 0" in msg
+    assert "row 1" in msg
+    assert "amount_local" in msg
+    assert "units_sold" in msg
+    assert "currency" in msg
+    assert "city" in msg
 
 
 def test_country_and_currency_are_normalised_to_upper(tmp_path: Path) -> None:
-    path = tmp_path / "sales.csv"
-    path.write_text(
+    good = _write(
+        tmp_path,
         "date,city,country,currency,amount_local,units_sold\n2024-09-02,Berlin, de , eur ,100,10\n",
-        encoding="utf-8",
     )
-    df = load_sales(path)
+    df = load_sales(good)
     assert df.loc[0, "country"] == "DE"
     assert df.loc[0, "currency"] == "EUR"
+
+
+def test_missing_file_raises(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        load_sales(tmp_path / "nope.csv")

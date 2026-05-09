@@ -44,9 +44,7 @@ def normalise_currency(sales: pd.DataFrame, fx_rates: pd.DataFrame, base_currenc
         raise ValueError(f"{len(unmatched)} sales rows have no FX rate. Sample: {sample}")
 
     merged["amount_base"] = (merged["amount_local"] * merged["rate_to_base"]).round(2)
-    merged["avg_unit_price_base"] = (
-        merged["amount_base"] / merged["units_sold"].replace(0, pd.NA)
-    ).round(4)
+    merged["avg_unit_price_base"] = (merged["amount_base"] / merged["units_sold"].replace(0, pd.NA)).round(4)
     merged["base_currency"] = base_currency
     return merged
 
@@ -109,7 +107,7 @@ def detect_anomalies(sales: pd.DataFrame, z_threshold: float = ANOMALY_Z_THRESHO
     Cities with fewer than 3 observations or zero variance are skipped.
     """
     out: list[pd.DataFrame] = []
-    for city, group in sales.groupby("city"):
+    for _city, group in sales.groupby("city"):
         if len(group) < 3:
             continue
         std = group["amount_base"].std(ddof=0)
@@ -123,9 +121,7 @@ def detect_anomalies(sales: pd.DataFrame, z_threshold: float = ANOMALY_Z_THRESHO
 
     if not out:
         return pd.DataFrame(columns=["date", "city", "country", "amount_base", "z_score"])
-    return pd.concat(out, ignore_index=True).sort_values(
-        ["date", "city"]
-    ).reset_index(drop=True)
+    return pd.concat(out, ignore_index=True).sort_values(["date", "city"]).reset_index(drop=True)
 
 
 CORRELATION_COLUMNS = ["city", "n", "corr_temp_revenue", "corr_precip_revenue"]
@@ -141,7 +137,7 @@ def weather_correlation(sales: pd.DataFrame) -> pd.DataFrame:
         rows.append(
             {
                 "city": city,
-                "n": int(len(group)),
+                "n": len(group),
                 "corr_temp_revenue": _safe_corr(rev, group["temp_mean_c"]),
                 "corr_precip_revenue": _safe_corr(rev, group["precipitation_mm"]),
             }

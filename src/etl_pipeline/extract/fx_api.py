@@ -94,7 +94,4 @@ def _fetch_pair(
         # No earlier publication available; back-fill from the first known value.
         series = series.bfill()
 
-    return [
-        {"date": d, "currency": foreign, "rate_to_base": float(rate)}
-        for d, rate in series.items()
-    ]
+    return [{"date": d, "currency": foreign, "rate_to_base": float(rate)} for d, rate in series.items()]

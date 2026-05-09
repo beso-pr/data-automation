@@ -64,19 +64,19 @@ def test_forward_fill_for_weekends(http_client: HttpClient, fx_api: ApiEndpoint)
     assert gbp["rate_to_base"].tolist() == [1.20, 1.20, 1.20]
 
 
-def test_raises_when_api_returns_no_rates(
-    http_client: HttpClient, fx_api: ApiEndpoint
-) -> None:
-    with patch.object(HttpClient, "get_json", return_value={"rates": {}}):
-        with pytest.raises(RuntimeError, match="no rates"):
-            fetch_fx_rates(
-                client=http_client,
-                api=fx_api,
-                currencies=["EUR"],
-                base_currency="USD",
-                start=date(2024, 9, 2),
-                end=date(2024, 9, 3),
-            )
+def test_raises_when_api_returns_no_rates(http_client: HttpClient, fx_api: ApiEndpoint) -> None:
+    with (
+        patch.object(HttpClient, "get_json", return_value={"rates": {}}),
+        pytest.raises(RuntimeError, match="no rates"),
+    ):
+        fetch_fx_rates(
+            client=http_client,
+            api=fx_api,
+            currencies=["EUR"],
+            base_currency="USD",
+            start=date(2024, 9, 2),
+            end=date(2024, 9, 3),
+        )
 
 
 def test_rejects_inverted_date_range(http_client: HttpClient, fx_api: ApiEndpoint) -> None:
@@ -91,9 +91,7 @@ def test_rejects_inverted_date_range(http_client: HttpClient, fx_api: ApiEndpoin
         )
 
 
-def test_back_fills_when_only_later_data_available(
-    http_client: HttpClient, fx_api: ApiEndpoint
-) -> None:
+def test_back_fills_when_only_later_data_available(http_client: HttpClient, fx_api: ApiEndpoint) -> None:
     # API returns data only for the last day; earlier days should bfill.
     payload = {"rates": {"2024-09-04": {"USD": 1.30}}}
     with patch.object(HttpClient, "get_json", return_value=payload):

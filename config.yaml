@@ -27,16 +27,34 @@ apis:
   weather_archive:
     base_url: https://archive-api.open-meteo.com/v1/archive
     timeout_seconds: 30
+  # Optional fallback for the trailing ~5 days that the archive doesn't cover yet.
+  # Comment this out to disable the fallback.
+  weather_forecast:
+    base_url: https://api.open-meteo.com/v1/forecast
+    timeout_seconds: 30
 
-# Resilience
+# Weather behaviour.
+weather:
+  archive_lag_days: 5      # archive endpoint trails today by ~5 days
+  fallback_to_forecast: true
+
+# Resilience knobs for HTTP calls.
 http:
   max_retries: 4
   backoff_seconds: 1.5
+  # Per-host circuit breaker: open after N consecutive failures, cool down for M sec.
+  circuit_breaker_threshold: 5
+  circuit_breaker_reset_seconds: 60
 
 cache:
   enabled: true
   directory: .cache
   ttl_hours: 24
+
+logging:
+  file_path: output/etl.log   # set to null to disable file logging
+  max_bytes: 5242880          # 5 MiB
+  backup_count: 5
 
 output:
   directory: output

@@ -43,8 +43,14 @@ def sample_sales() -> pd.DataFrame:
 def sample_fx_rates() -> pd.DataFrame:
     return pd.DataFrame(
         {
-            "date": [date(2024, 9, 2), date(2024, 9, 3), date(2024, 9, 2), date(2024, 9, 3),
-                     date(2024, 9, 2), date(2024, 9, 3)],
+            "date": [
+                date(2024, 9, 2),
+                date(2024, 9, 3),
+                date(2024, 9, 2),
+                date(2024, 9, 3),
+                date(2024, 9, 2),
+                date(2024, 9, 3),
+            ],
             "currency": ["EUR", "EUR", "GBP", "GBP", "USD", "USD"],
             "rate_to_base": [1.10, 1.11, 1.30, 1.31, 1.0, 1.0],
         }

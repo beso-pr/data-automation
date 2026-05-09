@@ -45,7 +45,7 @@ def render_html_report(
         "num_orders": f"{int(daily['num_orders'].sum()):,}",
         "avg_order_value": f"{(total_revenue / daily['num_orders'].sum()):,.2f}",
         "num_cities": int(daily["num_cities"].max()),
-        "num_anomalies": int(len(result.anomalies)),
+        "num_anomalies": len(result.anomalies),
     }
 
     env = Environment(
@@ -75,7 +75,4 @@ def render_html_report(
 
 def _records_with_nan_to_none(df: pd.DataFrame) -> list[dict[str, object]]:
     """Convert a dataframe to records, replacing NaN with None for clean Jinja rendering."""
-    return [
-        {k: (None if pd.isna(v) else v) for k, v in record.items()}
-        for record in df.to_dict("records")
-    ]
+    return [{k: (None if pd.isna(v) else v) for k, v in record.items()} for record in df.to_dict("records")]
