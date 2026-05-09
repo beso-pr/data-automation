@@ -1,6 +1,6 @@
 # `etl-pipeline` — Multi-API ETL & Reporting
 
-[![tests](https://github.com/<your-username>/data-automation/actions/workflows/tests.yml/badge.svg)](https://github.com/<your-username>/data-automation/actions/workflows/tests.yml)
+[![tests](https://github.com/beso-pr/data-automation/actions/workflows/tests.yml/badge.svg)](https://github.com/beso-pr/data-automation/actions/workflows/tests.yml)
 ![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)
 ![license](https://img.shields.io/badge/license-MIT-green)
@@ -54,7 +54,7 @@ HTML report at `output/report.html` at the end.
 
 ```bash
 # 1. Get the code
-git clone https://github.com/<your-username>/data-automation.git
+git clone https://github.com/beso-pr/data-automation.git
 cd data-automation
 
 # 2. Create + activate an isolated environment
@@ -80,7 +80,7 @@ xdg-open output/report.html  # Linux
 
 ```powershell
 # 1. Get the code
-git clone https://github.com/<your-username>/data-automation.git
+git clone https://github.com/beso-pr/data-automation.git
 cd data-automation
 
 # 2. Create + activate an isolated environment
@@ -107,7 +107,7 @@ start output\report.html
 ### Windows (cmd.exe)
 
 ```bat
-git clone https://github.com/<your-username>/data-automation.git
+git clone https://github.com/beso-pr/data-automation.git
 cd data-automation
 
 py -3 -m venv .venv
