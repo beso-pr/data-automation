@@ -1,0 +1,44 @@
+# Multi-API ETL pipeline configuration.
+
+input:
+  sales_csv: data/sales_sample.csv
+
+# Currency to normalise all revenue to.
+base_currency: USD
+
+# Cities to fetch weather for. Coordinates resolved via Open-Meteo geocoding.
+# (resolved coordinates are cached on disk between runs)
+cities:
+  - { name: Berlin,    country: DE }
+  - { name: Paris,     country: FR }
+  - { name: London,    country: GB }
+  - { name: Tokyo,     country: JP }
+  - { name: New York,  country: US }
+  - { name: Sao Paulo, country: BR }
+
+# APIs (free, no key required).
+apis:
+  fx:
+    base_url: https://api.frankfurter.app
+    timeout_seconds: 15
+  weather_geocode:
+    base_url: https://geocoding-api.open-meteo.com/v1/search
+    timeout_seconds: 15
+  weather_archive:
+    base_url: https://archive-api.open-meteo.com/v1/archive
+    timeout_seconds: 30
+
+# Resilience
+http:
+  max_retries: 4
+  backoff_seconds: 1.5
+
+cache:
+  enabled: true
+  directory: .cache
+  ttl_hours: 24
+
+output:
+  directory: output
+  sqlite_path: output/etl.sqlite
+  html_path: output/report.html
