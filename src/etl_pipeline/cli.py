@@ -27,7 +27,7 @@ logger = get_logger(__name__)
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="etl",
-        description="Multi-API ETL: sales CSV + FX + weather → SQLite + HTML report.",
+        description="Multi-API ETL: sales CSV + FX + weather -> SQLite + HTML report.",
     )
     parser.add_argument("--version", action="version", version=f"etl-pipeline {__version__}")
     parser.add_argument(
