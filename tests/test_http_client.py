@@ -107,7 +107,7 @@ def test_429_with_invalid_retry_after_falls_back_to_backoff(tmp_cache: JsonDiskC
         [_retryable(429, headers={"Retry-After": "not-a-number"}), _ok({"ok": True})],
     )
     assert client.get_json("https://example.test/api") == {"ok": True}
-    # falls back to exponential backoff (settings.backoff_seconds=0 → 0)
+    # falls back to exponential backoff (settings.backoff_seconds=0 -> 0)
     assert sleep_mock.call_count == 1
 
 
