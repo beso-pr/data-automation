@@ -238,7 +238,7 @@ data-automation/
 │   └── sales_sample.csv                 # 84-row demo dataset
 ├── src/etl_pipeline/
 │   ├── cli.py                           # argparse CLI (no third-party CLI lib)
-│   ├── config.py                        # YAML → frozen dataclasses
+│   ├── config.py                        # YAML -> frozen dataclasses
 │   ├── http_client.py                   # retries + Retry-After + cache, around requests
 │   ├── circuit_breaker.py               # per-host fail-fast breaker
 │   ├── cache.py                         # JSON disk cache with TTL
@@ -249,7 +249,7 @@ data-automation/
 │   │   └── weather_api.py               # Open-Meteo geocoding + archive/forecast APIs
 │   ├── transform/pipeline.py            # FX normalisation, KPIs, anomalies, correlation
 │   ├── load/
-│   │   ├── sqlite_loader.py             # DataFrames → SQLite (indexed)
+│   │   ├── sqlite_loader.py             # DataFrames -> SQLite (indexed)
 │   │   ├── dry_run.py                   # diff proposed vs existing without writing
 │   │   └── html_report.py               # Jinja2-rendered dashboard
 │   └── templates/report.html.j2         # self-contained HTML/CSS report
@@ -288,18 +288,18 @@ needs these columns: `date, city, country, currency, amount_local, units_sold`
 ## How it works
 
 ```
-1. EXTRACT   sales_csv.py     → validate schema, parse dates, normalise text
-             fx_api.py        → fetch FX time series from Frankfurter (cached)
-             weather_api.py   → geocode cities, fetch daily weather (cached)
+1. EXTRACT   sales_csv.py     -> validate schema, parse dates, normalise text
+             fx_api.py        -> fetch FX time series from Frankfurter (cached)
+             weather_api.py   -> geocode cities, fetch daily weather (cached)
 
-2. TRANSFORM pipeline.py      → join sales × FX → revenue in base currency
-                              → left-join weather on (date, city)
-                              → roll up to daily / country / city summaries
-                              → flag city-day revenue outliers (|z| ≥ 2.0)
-                              → compute weather/revenue Pearson correlation
+2. TRANSFORM pipeline.py      -> join sales × FX -> revenue in base currency
+                              -> left-join weather on (date, city)
+                              -> roll up to daily / country / city summaries
+                              -> flag city-day revenue outliers (|z| ≥ 2.0)
+                              -> compute weather/revenue Pearson correlation
 
-3. LOAD      sqlite_loader.py → write 8 indexed tables to SQLite
-             html_report.py   → render dashboard via Jinja2 template
+3. LOAD      sqlite_loader.py -> write 8 indexed tables to SQLite
+             html_report.py   -> render dashboard via Jinja2 template
 ```
 
 ## Why this exists (the practical pitch)
